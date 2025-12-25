@@ -34,6 +34,7 @@ app.use("/api/profile", require("./routes/profile"));
 app.use("/api/cart", require("./routes/cart"));
 app.use("/api/appointments", require("./routes/appointment"));
 app.use("/api/doctor/visits", require("./routes/doctorVisits"));
+app.use("/api/categories", require("./routes/doctorCategories"));
 
 
 app.listen(5000, () => console.log("Server running on http://localhost:5000"));

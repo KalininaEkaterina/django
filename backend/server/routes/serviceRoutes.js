@@ -3,7 +3,7 @@ const Service = require("../models/Service");
 const DoctorCategory = require("../models/DoctorCategory");
 const isDoctor = require("../middleware/isDoctor");
 
-/* ========== ДЛЯ ПОЛЬЗОВАТЕЛЯ ========== */
+
 router.get("/", async (req, res) => {
   const { category, min_price, max_price, search } = req.query;
 
@@ -22,7 +22,6 @@ router.get("/categories", async (req, res) => {
   res.json(await DoctorCategory.find());
 });
 
-/* ========== ДЛЯ ДОКТОРА (CRUD) ========== */
 router.get("/doctor", isDoctor, async (req, res) => {
   const { search, sort } = req.query;
 

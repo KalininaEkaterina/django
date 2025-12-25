@@ -4,9 +4,9 @@ const UserSchema = new mongoose.Schema(
   {
     username: String,
     email: { type: String, required: true, unique: true },
-    password: String, // null для OAuth
+    password: String,
     role: { type: String, enum: ["client", "doctor"], default: "client" },
-    provider: { type: String, default: "local" }, // local | google | facebook
+    provider: { type: String, default: "local" },
     providerId: String,
   },
   { timestamps: true }

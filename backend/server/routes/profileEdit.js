@@ -4,7 +4,7 @@ const User = require("../models/User");
 const DoctorProfile = require("../models/DoctorProfile");
 const ClientProfile = require("../models/ClientProfile");
 
-/* ================= GET ================= */
+
 router.get("/", auth, async (req, res) => {
   const user = await User.findById(req.user.id);
 
@@ -17,7 +17,6 @@ router.get("/", auth, async (req, res) => {
   res.json({ role: "client", profile });
 });
 
-/* ================= PUT ================= */
 router.put("/", auth, async (req, res) => {
   const user = await User.findById(req.user.id);
 

@@ -16,7 +16,7 @@ module.exports = function isDoctor(req, res, next) {
       return res.status(403).json({ message: "Доступ только для врача" });
     }
 
-    req.user = decoded; // 👈 ВАЖНО
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Невалидный токен" });

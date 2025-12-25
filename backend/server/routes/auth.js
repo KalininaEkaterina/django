@@ -4,12 +4,11 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
-/* ================= ROLE ================= */
+
 function getRoleByEmail(email = "") {
   return email.endsWith("@doctor.com") ? "doctor" : "user";
 }
 
-/* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -40,7 +39,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-/* ================= REGISTER ================= */
 router.post("/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -76,7 +74,6 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-/* ================= GOOGLE ================= */
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -92,7 +89,6 @@ router.get(
 
       let user = await User.findOne({ email });
 
-      // 🔥 СОЗДАЁТСЯ ТОЛЬКО ОДИН РАЗ
       if (!user) {
         user = await User.create({
           email,
@@ -112,7 +108,6 @@ router.get(
         { expiresIn: "7d" }
       );
 
-      // 🔥 РЕДИРЕКТ СРАЗУ ПО РОЛИ
       if (role === "doctor") {
         res.redirect(`http://localhost:3000/doctor/services?token=${token}`);
       } else {
@@ -126,7 +121,6 @@ router.get(
 );
 
 
-/* ================= FACEBOOK (FAKE) ================= */
 router.get("/facebook", async (req, res) => {
   const email = "demo@facebook.com";
   const role = getRoleByEmail(email);
