@@ -8,9 +8,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const [isSignUpActive, setSignUpActive] = useState(false);
 
-  // ============================
-  // STATES
-  // ============================
+
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -25,9 +23,7 @@ export default function AuthPage() {
 
   const [error, setError] = useState("");
 
-  // ============================
-  // REDIRECT BY ROLE
-  // ============================
+
   const redirectByRole = useCallback(
     (token) => {
       try {
@@ -45,9 +41,6 @@ export default function AuthPage() {
     [navigate]
   );
 
-  // ============================
-  // GOOGLE / FACEBOOK REDIRECT
-  // ============================
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
@@ -58,9 +51,6 @@ export default function AuthPage() {
     }
   }, [redirectByRole]);
 
-  // ============================
-  // LOGIN
-  // ============================
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -86,9 +76,6 @@ export default function AuthPage() {
     }
   };
 
-  // ============================
-  // REGISTER
-  // ============================
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
@@ -181,7 +168,6 @@ export default function AuthPage() {
             <input type="submit" className="btn solid" value="Login" />
           </form>
 
-          {/* REGISTER */}
           <form className="sign-up-form" onSubmit={handleRegister}>
             <h2 className="title">Sign up</h2>
 
@@ -257,7 +243,6 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* PANELS */}
       <div className="panels-container">
         <div className="panel left-panel">
           <div className="content">

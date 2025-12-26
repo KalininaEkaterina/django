@@ -33,13 +33,11 @@ export default function ServicesPage() {
   return (
     <div className="profile-page-wrapper">
 
-      {/* Хедер как в Django */}
       <header className="page-header">
         <button className="login-btn">Профиль</button>
       </header>
 
       <div className="card">
-        {/* ЛЕВАЯ КОЛОНКА (ФИЛЬТРЫ) */}
         <div className="left-container">
           <h2 className="gradienttext">Фильтр</h2>
 
@@ -78,7 +76,6 @@ export default function ServicesPage() {
           </button>
         </div>
 
-        {/* ПРАВАЯ КОЛОНКА (СПИСОК УСЛУГ) */}
         <div className="right-container">
           <h3 className="gradienttext">Список услуг</h3>
 
