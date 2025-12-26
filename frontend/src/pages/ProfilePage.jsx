@@ -1,25 +1,49 @@
-import { useEffect, useState } from "react";
-import DoctorProfile from "./DoctorProfile";
+import React, { useState, useEffect } from "react";
 import ClientProfile from "./ClientProfile";
 
 export default function ProfilePage() {
-  const [data, setData] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/profile", {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/profile/me", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
     })
-      .then(res => res.json())
-      .then(setData);
+      .then(res => {
+        if (!res.ok) throw new Error("Ошибка при загрузке профиля");
+        return res.json();
+      })
+      .then(data => setProfileData(data))
+      .catch(err => {
+        console.error(err);
+        setError(err.message);
+      });
   }, []);
 
-  if (!data) return <div>Loading...</div>;
-
-  if (data.role === "doctor") {
-    return <DoctorProfile data={data} />;
+  if (error) {
+    return (
+      <div className="profile-page-wrapper">
+        <h2 style={{color: "white"}}>Ошибка: {error}</h2>
+      </div>
+    );
   }
 
-  return <ClientProfile data={data} />;
+  if (!profileData) {
+    return (
+      <div className="profile-page-wrapper">
+        <h2 style={{color: "white"}}>Загрузка данных профиля...</h2>
+      </div>
+    );
+  }
+
+  return (
+    <div className="profile-page-wrapper">
+      <ClientProfile data={profileData} />
+    </div>
+  );
 }

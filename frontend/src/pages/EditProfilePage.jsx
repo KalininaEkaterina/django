@@ -1,111 +1,140 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
 
 export default function EditProfilePage() {
-  const [role, setRole] = useState(null);
-  const [form, setForm] = useState({});
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    mobile: "",
+    address: ""
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/profile/edit", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/profile/me", {
+      headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Не удалось загрузить данные");
+        return res.json();
+      })
       .then(data => {
-        setRole(data.role);
-        setForm(data.profile || {});
+        if (data.profile) {
+          setFormData({
+            firstName: data.profile.firstName || "",
+            lastName: data.profile.lastName || "",
+            dateOfBirth: data.profile.dateOfBirth ? data.profile.dateOfBirth.split('T')[0] : "",
+            mobile: data.profile.mobile || "",
+            address: data.profile.address || ""
+          });
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
       });
   }, []);
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  function submit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
 
-    fetch("http://localhost:5000/api/profile/edit", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(form),
-    }).then(() => navigate("/profile"));
-  }
+    try {
+      const res = await fetch("http://localhost:5000/api/profile/update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
 
-  if (!role) return <div>Loading...</div>;
+      if (res.ok) {
+        navigate("/profile");
+      } else {
+        alert("Ошибка при сохранении");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) return <div className="profile-page-wrapper"><h2 style={{color: "white"}}>Загрузка...</h2></div>;
+  if (error) return <div className="profile-page-wrapper"><h2 style={{color: "white"}}>{error}</h2></div>;
 
   return (
-    <div className="card">
-      <h2 className="gradienttext">Edit profile</h2>
-
-      <form onSubmit={submit}>
-        <input
-          name="firstName"
-          placeholder="First name"
-          value={form.firstName || ""}
-          onChange={handleChange}
-        />
-
-        <input
-          name="lastName"
-          placeholder="Last name"
-          value={form.lastName || ""}
-          onChange={handleChange}
-        />
-
-        {role === "client" && (
-          <>
+    <div className="profile-page-wrapper">
+      <div className="card">
+        <h2 className="gradienttext">Edit Profile</h2>
+        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+          <div className="input-group">
+            <label>First Name</label>
             <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Last Name</label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Date of Birth</label>
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Mobile</label>
+            <input
+              type="text"
               name="mobile"
-              placeholder="Mobile"
-              value={form.mobile || ""}
+              value={formData.mobile}
               onChange={handleChange}
             />
+          </div>
+
+          <div className="input-group">
+            <label>Address</label>
             <input
+              type="text"
               name="address"
-              placeholder="Address"
-              value={form.address || ""}
+              value={formData.address}
               onChange={handleChange}
             />
-          </>
-        )}
+          </div>
 
-        {role === "doctor" && (
-          <>
-            <input
-              name="specialization"
-              placeholder="Specialization"
-              value={form.specialization || ""}
-              onChange={handleChange}
-            />
-            <input
-              name="category"
-              placeholder="Category"
-              value={form.category || ""}
-              onChange={handleChange}
-            />
-            <input
-              name="department"
-              placeholder="Department"
-              value={form.department || ""}
-              onChange={handleChange}
-            />
-            <textarea
-              name="info"
-              placeholder="Info"
-              value={form.info || ""}
-              onChange={handleChange}
-            />
-          </>
-        )}
-
-        <button className="btn">Save</button>
-      </form>
+          <div style={{ marginTop: "20px", display: "flex", gap: "10px", justifyContent: "center" }}>
+            <button type="submit" className="btn solid">Save Changes</button>
+            <button type="button" onClick={() => navigate("/profile")} className="btn">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

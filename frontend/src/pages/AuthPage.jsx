@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import "./signin.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
-
 export default function AuthPage() {
   const navigate = useNavigate();
   const [isSignUpActive, setSignUpActive] = useState(false);
-
+  const [error, setError] = useState("");
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -21,20 +20,23 @@ export default function AuthPage() {
     repeatPassword: "",
   });
 
-  const [error, setError] = useState("");
-
-
   const redirectByRole = useCallback(
     (token) => {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
+
+        // Сохраняем данные для быстрой проверки на других страницах
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", payload.role || "client");
+        localStorage.setItem("username", payload.username || "");
 
         if (payload.role === "doctor") {
           navigate("/doctor/services", { replace: true });
         } else {
           navigate("/services", { replace: true });
         }
-      } catch {
+      } catch (err) {
+        console.error("Ошибка обработки токена:", err);
         navigate("/services", { replace: true });
       }
     },
@@ -46,7 +48,6 @@ export default function AuthPage() {
     const token = params.get("token");
 
     if (token) {
-      localStorage.setItem("token", token);
       redirectByRole(token);
     }
   }, [redirectByRole]);
@@ -69,9 +70,8 @@ export default function AuthPage() {
         return;
       }
 
-      localStorage.setItem("token", data.token);
       redirectByRole(data.token);
-    } catch {
+    } catch (err) {
       setError("Ошибка сервера");
     }
   };
@@ -82,11 +82,6 @@ export default function AuthPage() {
 
     if (registerData.password !== registerData.repeatPassword) {
       setError("Пароли не совпадают");
-      return;
-    }
-
-    if (registerData.password.length < 6) {
-      setError("Пароль должен быть минимум 6 символов");
       return;
     }
 
@@ -108,13 +103,8 @@ export default function AuthPage() {
         return;
       }
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        redirectByRole(data.token);
-      } else {
-        navigate("/services", { replace: true });
-      }
-    } catch {
+      redirectByRole(data.token);
+    } catch (err) {
       setError("Ошибка сервера");
     }
   };
@@ -124,38 +114,31 @@ export default function AuthPage() {
       <div className="forms-container">
         <div className="signin-signup">
 
-          {/* LOGIN */}
           <form className="sign-in-form" onSubmit={handleLogin}>
             <h2 className="title">Sign in</h2>
-
             <div className="input-field">
               <i className="fas fa-envelope"></i>
               <input
                 type="email"
                 placeholder="Email"
                 value={loginData.email}
-                onChange={(e) =>
-                  setLoginData({ ...loginData, email: e.target.value })
-                }
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                 required
               />
             </div>
-
             <div className="input-field">
               <i className="fas fa-lock"></i>
               <input
                 type="password"
                 placeholder="Password"
                 value={loginData.password}
-                onChange={(e) =>
-                  setLoginData({ ...loginData, password: e.target.value })
-                }
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                 required
               />
             </div>
-
-            {error && <p className="error">{error}</p>}
-
+            {error && <p className="error" style={{ color: "red", fontSize: "0.8rem" }}>{error}</p>}
+            <input type="submit" className="btn solid" value="Login" />
+            <p className="social-text">Or Sign in with social platforms</p>
             <div className="social-media">
               <a href="http://localhost:5000/auth/google" className="social-icon">
                 <i className="fab fa-google"></i>
@@ -164,82 +147,53 @@ export default function AuthPage() {
                 <i className="fab fa-facebook-f"></i>
               </a>
             </div>
-
-            <input type="submit" className="btn solid" value="Login" />
           </form>
 
           <form className="sign-up-form" onSubmit={handleRegister}>
             <h2 className="title">Sign up</h2>
-
             <div className="input-field">
               <i className="fas fa-user"></i>
               <input
                 type="text"
                 placeholder="Username"
                 value={registerData.username}
-                onChange={(e) =>
-                  setRegisterData({ ...registerData, username: e.target.value })
-                }
+                onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
                 required
               />
             </div>
-
             <div className="input-field">
               <i className="fas fa-envelope"></i>
               <input
                 type="email"
                 placeholder="Email"
                 value={registerData.email}
-                onChange={(e) =>
-                  setRegisterData({ ...registerData, email: e.target.value })
-                }
+                onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                 required
               />
             </div>
-
             <div className="input-field">
               <i className="fas fa-lock"></i>
               <input
                 type="password"
                 placeholder="Password"
                 value={registerData.password}
-                onChange={(e) =>
-                  setRegisterData({ ...registerData, password: e.target.value })
-                }
+                onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                 required
               />
             </div>
-
             <div className="input-field">
               <i className="fas fa-lock"></i>
               <input
                 type="password"
                 placeholder="Repeat password"
                 value={registerData.repeatPassword}
-                onChange={(e) =>
-                  setRegisterData({
-                    ...registerData,
-                    repeatPassword: e.target.value,
-                  })
-                }
+                onChange={(e) => setRegisterData({ ...registerData, repeatPassword: e.target.value })}
                 required
               />
             </div>
-
-            {error && <p className="error">{error}</p>}
-
-            <div className="social-media">
-              <a href="http://localhost:5000/auth/google" className="social-icon">
-                <i className="fab fa-google"></i>
-              </a>
-              <a href="http://localhost:5000/auth/facebook" className="social-icon">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-            </div>
-
+            {error && <p className="error" style={{ color: "red", fontSize: "0.8rem" }}>{error}</p>}
             <input type="submit" className="btn" value="Sign up" />
           </form>
-
         </div>
       </div>
 
@@ -248,28 +202,17 @@ export default function AuthPage() {
           <div className="content">
             <h3>New here?</h3>
             <p>Join our medical community!</p>
-            <button
-              className="btn transparent"
-              onClick={() => setSignUpActive(true)}
-            >
-              Sign up
-            </button>
+            <button className="btn transparent" onClick={() => setSignUpActive(true)}>Sign up</button>
           </div>
-          <img src="/images/log2.png" className="image" alt="" />
+          <img src="/images/log2.png" className="image" alt="Login Illustration" />
         </div>
-
         <div className="panel right-panel">
           <div className="content">
             <h3>One of us?</h3>
             <p>Welcome back! Join us again.</p>
-            <button
-              className="btn transparent"
-              onClick={() => setSignUpActive(false)}
-            >
-              Sign in
-            </button>
+            <button className="btn transparent" onClick={() => setSignUpActive(false)}>Sign in</button>
           </div>
-          <img src="/images/register.svg" className="image register" alt="" />
+          <img src="/images/register.svg" className="image register" alt="Register Illustration" />
         </div>
       </div>
     </div>
