@@ -10,6 +10,7 @@ const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
 const session = require("express-session");
+const profile = require("./routes/profile");
 require("./config/passport");
 
 const app = express();

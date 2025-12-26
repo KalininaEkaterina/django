@@ -4,9 +4,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
-
 function getRoleByEmail(email = "") {
-  return email.endsWith("@doctor.com") ? "doctor" : "user";
+  return email.endsWith("@doctor.com") ? "doctor" : "client";
 }
 
 router.post("/login", async (req, res) => {
@@ -15,27 +14,24 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user || !user.password) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Неверный логин или пароль" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Неверный логин или пароль" });
     }
 
     const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({ token, role: user.role });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Ошибка входа:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
 });
 
@@ -45,7 +41,7 @@ router.post("/signup", async (req, res) => {
 
     const exists = await User.findOne({ email });
     if (exists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "Пользователь с такой почтой уже существует" });
     }
 
     const role = getRoleByEmail(email);
@@ -59,18 +55,15 @@ router.post("/signup", async (req, res) => {
     });
 
     const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({ token, role });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("ОШИБКА ПРИ РЕГИСТРАЦИИ:", err.message);
+    res.status(500).json({ message: "Ошибка сервера при регистрации" });
   }
 });
 
@@ -99,27 +92,22 @@ router.get(
       }
 
       const token = jwt.sign(
-        {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-        },
+        { id: user._id, email: user.email, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
 
-      if (role === "doctor") {
-        res.redirect(`http://localhost:3000/doctor/services?token=${token}`);
-      } else {
-        res.redirect(`http://localhost:3000/services?token=${token}`);
-      }
+      const redirectUrl = role === "doctor"
+        ? `http://localhost:3000/doctor/services?token=${token}`
+        : `http://localhost:3000/services?token=${token}`;
+
+      res.redirect(redirectUrl);
     } catch (err) {
-      console.error(err);
+      console.error("Google Auth Error:", err);
       res.redirect("http://localhost:3000/auth");
     }
   }
 );
-
 
 router.get("/facebook", async (req, res) => {
   const email = "demo@facebook.com";
@@ -135,11 +123,7 @@ router.get("/facebook", async (req, res) => {
   }
 
   const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-    },
+    { id: user._id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );

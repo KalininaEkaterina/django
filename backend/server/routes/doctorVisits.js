@@ -1,46 +1,31 @@
 const router = require("express").Router();
 const PlannedVisit = require("../models/PlannedVisit");
-const AppointmentSchedule = require("../models/AppointmentSchedule");
+const DoctorProfile = require("../models/DoctorProfile");
 const isDoctor = require("../middleware/isDoctor");
 
 router.get("/", isDoctor, async (req, res) => {
   try {
+    const doctorProfile = await DoctorProfile.findOne({ user: req.user.id });
+
+    if (!doctorProfile) {
+      return res.json([]);
+    }
+
     const visits = await PlannedVisit.find()
       .populate({
         path: 'schedule',
-        match: { doctor: req.user.doctorProfileId }
+        match: { doctor: doctorProfile._id }
       })
-      .populate('client')
+      .populate('client', 'username email')
       .populate('services');
 
     const doctorVisits = visits.filter(v => v.schedule !== null);
+
     res.json(doctorVisits);
   } catch (err) {
-    res.status(500).json(err);
+    console.error("Ошибка в doctorVisits:", err);
+    res.status(500).json({ message: "Ошибка сервера", details: err.message });
   }
-});
-
-router.put("/:id", isDoctor, async (req, res) => {
-  try {
-    const { diagnosis_text, date, time_start, time_end } = req.body;
-    const visit = await PlannedVisit.findById(req.params.id);
-
-    visit.diagnosis_text = diagnosis_text;
-    await visit.save();
-
-    await AppointmentSchedule.findByIdAndUpdate(visit.schedule, {
-      date, time_start, time_end
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-router.delete("/:id", isDoctor, async (req, res) => {
-  await PlannedVisit.findByIdAndDelete(req.params.id);
-  res.json({ success: true });
 });
 
 module.exports = router;

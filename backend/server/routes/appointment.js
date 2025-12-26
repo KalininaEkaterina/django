@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const PlannedVisit = require("../models/PlannedVisit");
-const { verifyToken } = require("../middleware/auth");
+const verifyToken = require("../middleware/auth");
 
 router.get("/", verifyToken, async (req, res) => {
   try {
