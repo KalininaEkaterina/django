@@ -10,6 +10,15 @@ import DoctorVisitsPage from "./pages/DoctorVisitsPage";
 import EditVisitPage from "./pages/EditVisitPage";
 import DoctorCategoriesPage from "./pages/DoctorCategories";
 import ServicesDetailPage from "./pages/ServicesDetailPage";
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import NewsPage from "./pages/NewsPage";
+import DictionaryPage from "./pages/DictionaryPage";
+import ContactsPage from "./pages/ContactsPage";
+import VacanciesPage from "./pages/VacanciesPage";
+import ReviewsPage from "./pages/ReviewsPage";
+import PromocodesPage from "./pages/PromocodesPage";
+import LabPage from "./pages/LabPage";
 
 const ProtectedRoute = ({ children, roleRequired }) => {
   const token = localStorage.getItem("token");
@@ -76,6 +85,15 @@ function App() {
             <EditVisitPage />
           </ProtectedRoute>
         } />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/dictionary" element={<DictionaryPage />} />
+        <Route path="/contacts" element={<ContactsPage />} />
+        <Route path="/vacancies" element={<VacanciesPage />} />
+        <Route path="/reviews" element={<ReviewsPage />} />
+        <Route path="/promocodes" element={<PromocodesPage />} />
+        <Route path="/lab3" element={<LabPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

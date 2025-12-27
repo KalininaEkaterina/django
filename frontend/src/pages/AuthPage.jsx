@@ -25,7 +25,6 @@ export default function AuthPage() {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
 
-        // Сохраняем данные для быстрой проверки на других страницах
         localStorage.setItem("token", token);
         localStorage.setItem("role", payload.role || "client");
         localStorage.setItem("username", payload.username || "");
